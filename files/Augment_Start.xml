@@ -1,0 +1,44 @@
+<project name="Augment_Start" pubsub="auto" heartbeat-interval="1" index="pi_HASH" threads="4" use-tagged-token="true">
+  <metadata>
+    <meta id="studioUploadedBy">zestem</meta>
+    <meta id="studioUploaded">1659454373263</meta>
+    <meta id="studioModifiedBy">zestem</meta>
+    <meta id="studioModified">1660308037825</meta>
+    <meta id="layout">{"cq1":{"Source":{"x":-60,"y":-225},"transaction_src":{"x":-150,"y":-710}}}</meta>
+  </metadata>
+  <properties>
+    <property name="INPUTCSVLOC"><![CDATA[/home/zestem/Common_Data/zestem]]></property>
+    <property name="INPUTCSVFILE"><![CDATA[trades.csv]]></property>
+    <property name="OUTPUTCSVLOC"><![CDATA[/home/zestem/Common_Data/zestem]]></property>
+    <property name="OUTPUTCSVFILE"><![CDATA[csv_out.csv]]></property>
+  </properties>
+  <contqueries>
+    <contquery name="cq1">
+      <windows>
+        <window-source insert-only="true" index="pi_EMPTY" name="transaction_src">
+          <description><![CDATA[This is a Source window with a file/socket connector that publishes input data to the model.]]></description>
+          <schema>
+            <fields>
+              <field name="ID" type="int32" key="true"/>
+              <field name="symbol" type="string"/>
+              <field name="price" type="double"/>
+              <field name="quantity" type="int32"/>
+              <field name="buysellflg" type="int32"/>
+              <field name="time" type="stamp"/>
+            </fields>
+          </schema>
+          <connectors>
+            <connector class="fs" name="Trades_In">
+              <properties>
+                <property name="type"><![CDATA[pub]]></property>
+                <property name="dateformat"><![CDATA[%m/%d/%Y %H:%M]]></property>
+                <property name="fsname"><![CDATA[@INPUTCSVLOC@/@INPUTCSVFILE@]]></property>
+                <property name="fstype"><![CDATA[csv]]></property>
+              </properties>
+            </connector>
+          </connectors>
+        </window-source>
+      </windows>
+    </contquery>
+  </contqueries>
+</project>

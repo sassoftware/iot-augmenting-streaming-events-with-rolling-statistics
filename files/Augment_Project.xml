@@ -1,0 +1,120 @@
+<project name="Augment_Project" pubsub="auto" heartbeat-interval="1" index="pi_HASH" threads="4" use-tagged-token="true">
+  <metadata>
+    <meta id="studioUploadedBy">zestem</meta>
+    <meta id="studioUploaded">1659356661672</meta>
+    <meta id="studioModifiedBy">zestem</meta>
+    <meta id="studioModified">1660307990763</meta>
+    <meta id="layout">{"cq1":{"Source":{"x":-60,"y":-225},"augment_src":{"x":-320,"y":55},"calc_avg_price_tot_quan":{"x":-45,"y":-35},"diff_price_avg_price":{"x":-320,"y":170},"retain_15_mins":{"x":-45,"y":-150},"transaction_src":{"x":-45,"y":-265}}}</meta>
+  </metadata>
+  <properties>
+    <property name="INPUTCSVLOC"><![CDATA[/home/zestem/Common_Data/zestem]]></property>
+    <property name="INPUTCSVFILE"><![CDATA[trades.csv]]></property>
+    <property name="OUTPUTCSVLOC"><![CDATA[/home/zestem/Common_Data/zestem]]></property>
+    <property name="OUTPUTCSVFILE"><![CDATA[csv_out.csv]]></property>
+  </properties>
+  <contqueries>
+    <contquery name="cq1">
+      <windows>
+        <window-source insert-only="true" index="pi_EMPTY" name="transaction_src">
+          <description><![CDATA[This is a Source window with a file/socket connector that publishes input data to the model.]]></description>
+          <schema>
+            <fields>
+              <field name="ID" type="int32" key="true"/>
+              <field name="symbol" type="string"/>
+              <field name="price" type="double"/>
+              <field name="quantity" type="int32"/>
+              <field name="buysellflg" type="int32"/>
+              <field name="time" type="stamp"/>
+            </fields>
+          </schema>
+          <connectors>
+            <connector class="fs" name="Trades_In" active="false">
+              <properties>
+                <property name="type"><![CDATA[pub]]></property>
+                <property name="dateformat"><![CDATA[%m/%d/%Y %H:%M]]></property>
+                <property name="fsname"><![CDATA[@INPUTCSVLOC@/@INPUTCSVFILE@]]></property>
+                <property name="fstype"><![CDATA[csv]]></property>
+              </properties>
+            </connector>
+          </connectors>
+        </window-source>
+        <window-copy name="retain_15_mins">
+          <description><![CDATA[This is a Copy window set to retain events for a sliding 15 minute period.]]></description>
+          <retention type="bytime_sliding"><![CDATA[15 minutes]]></retention>
+        </window-copy>
+        <window-aggregate name="calc_avg_price_tot_quan">
+          <description><![CDATA[This is an Aggregate window that computes the running average price and total quantity for each symbol.]]></description>
+          <schema>
+            <fields>
+              <field name="symbol" type="string" key="true"/>
+              <field name="avg_price" type="double"/>
+              <field name="tot_quan" type="int32"/>
+            </fields>
+          </schema>
+          <output>
+            <field-expr><![CDATA[ESP_aAve(price)]]></field-expr>
+            <field-expr><![CDATA[ESP_aSum(quantity)]]></field-expr>
+          </output>
+        </window-aggregate>
+        <window-join index="pi_EMPTY" name="augment_src">
+          <description><![CDATA[This is a stateless Join window that augments the streaming event with the matching average price and total quantity.]]></description>
+          <join type="leftouter">
+            <conditions>
+              <fields left="symbol" right="symbol"/>
+            </conditions>
+          </join>
+          <output>
+            <field-selection name="symbol" source="l_symbol"/>
+            <field-selection name="price" source="l_price"/>
+            <field-selection name="avg_price" source="r_avg_price"/>
+            <field-selection name="quantity" source="l_quantity"/>
+            <field-selection name="tot_quan" source="r_tot_quan"/>
+            <field-selection name="time" source="l_time"/>
+          </output>
+        </window-join>
+        <window-compute index="pi_EMPTY" name="diff_price_avg_price">
+          <description><![CDATA[This is a Compute window that calculates the difference between the current price and the average price.]]></description>
+          <schema>
+            <fields>
+              <field name="ID" type="int32" key="true"/>
+              <field name="symbol" type="string"/>
+              <field name="price" type="double"/>
+              <field name="avg_price" type="double"/>
+              <field name="quantity" type="int32"/>
+              <field name="tot_quan" type="int64"/>
+              <field name="diff" type="double"/>
+              <field name="time" type="stamp"/>
+            </fields>
+          </schema>
+          <output>
+            <field-expr><![CDATA[symbol]]></field-expr>
+            <field-expr><![CDATA[price]]></field-expr>
+            <field-expr><![CDATA[avg_price]]></field-expr>
+            <field-expr><![CDATA[quantity]]></field-expr>
+            <field-expr><![CDATA[tot_quan]]></field-expr>
+            <field-expr><![CDATA[price - avg_price]]></field-expr>
+            <field-expr><![CDATA[time]]></field-expr>
+          </output>
+          <connectors>
+            <connector class="fs" name="csv_sub">
+              <properties>
+                <property name="type"><![CDATA[sub]]></property>
+                <property name="dateformat"><![CDATA[%Y-%m-%d %H:%M:%S]]></property>
+                <property name="snapshot"><![CDATA[true]]></property>
+                <property name="fsname"><![CDATA[@OUTPUTCSVLOC@/@OUTPUTCSVFILE@]]></property>
+                <property name="fstype"><![CDATA[csv]]></property>
+              </properties>
+            </connector>
+          </connectors>
+        </window-compute>
+      </windows>
+      <edges>
+        <edge source="retain_15_mins" target="calc_avg_price_tot_quan"/>
+        <edge source="transaction_src" target="augment_src" role="left"/>
+        <edge source="calc_avg_price_tot_quan" target="augment_src" role="right"/>
+        <edge source="augment_src" target="diff_price_avg_price"/>
+        <edge source="transaction_src" target="retain_15_mins"/>
+      </edges>
+    </contquery>
+  </contqueries>
+</project>
