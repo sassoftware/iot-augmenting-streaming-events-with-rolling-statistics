@@ -260,7 +260,7 @@ Use the following steps to add and configure the required Aggregate window so it
 
 ### Add and Configure the Join Window
 
-Use the following steps to add and configure the required Join window. You will make the window is stateless, use tagged token event flow, and set the No-regenerates option.
+Use the following steps to add and configure the required Join window. You will configure the window to be stateless, use tagged token event flow, and set the No-regenerates option.
 
 1. In the **Windows** pane, expand **Transformations** and drag a Join window into the model.
 1. Create the required edges in order:
