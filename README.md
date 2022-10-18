@@ -229,7 +229,7 @@ Use the following steps to add and configure the required Copy window.
 
 ### Add and Configure the Aggregate Window
 
-<img src='images/aggregate.png' width='707px'>
+<img src='images/aggregate.PNG' width='707px'>
 
 _Figure 4 - Aggregate Window Output Schema_
 
