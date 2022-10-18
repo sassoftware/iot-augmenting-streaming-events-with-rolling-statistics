@@ -414,7 +414,7 @@ This repository includes three output csv files created by the model. One is nor
 | ------ | ------ |
 | [csv_out.csv](files/csv_out.csv) | Normal output using tagged tokens, stateless join, and the No-regeberat3es option turned on. |
 | [csv_out_no_tagged_token.csv](files/csv_out_no_tagged_token.csv) | Output with Use tagged tokens turned off. |
-| [csv_out_no_regen_off2.csv](files/csv_out_no_tagged_token.csv) | Output with the No-regenerates option turned off. |
+| [csv_out_no_regen_off2.csv](files/csv_out_no_regen_off2.csv) | Output with the No-regenerates option turned off. |
 
 ## License
 
