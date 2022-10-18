@@ -52,7 +52,9 @@ Upon completion of this tutorial, you will be able to:
 - Prevent a Join window from re-generating values on the fact side when the dimension side of the join is updated.
 - Synchronize two forks of a join and match tagged values with tagged calculated values using tagged token event flow.
 
-![](videos/animated_diagram.mp4)
+[![Augmnenting Streaming Events with Rolling Statistics](/images/video1.png)](
+http://sas-social.brightcovegallery.com/sharing?videoId=6313938796112
+ "Augmnenting Streaming Events with Rolling Statistics")
 
 ## ESP model
 
